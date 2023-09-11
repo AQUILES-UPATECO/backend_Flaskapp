@@ -1,4 +1,4 @@
-from ..model.actors import Actor
+from ..model.modelo import Actor
 from flask import request
 from flask import jsonify
 

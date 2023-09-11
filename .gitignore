@@ -1,1 +1,6 @@
 archivoignorado.txt
+*.pyc
+.env
+.venv
+env/
+venv/
