@@ -1,38 +1,43 @@
 from flask import Flask
 from config import Config
+from flask_cors import CORS
+from app.routes.usuarios_routes import usuarios_bp
+from app.routes.servidores_rutas import servidores_bp
+from app.routes.canales_rutas import canales_bp
+from app.routes.mensajes_rutas import mensajes_bp
+from app.database import DatabaseConnection
+from flask_login import LoginManager
 
-from .routes.autenticacion_routes import autenticacion_routes
-from .routes.servidores_routes import servidores_routes
-from .routes.mensajes_routes import mensajes_routes
-from .routes.canales_routes import canales_routes
-from .routes.usuarios_routes import usuarios_routes
-
-
-from .database import DatabaseConnection
 
 def init_app():
     """Crea y configura la aplicación Flask"""
-    
-    app = Flask(__name__, static_folder=Config.STATIC_FOLDER, template_folder=Config.TEMPLATE_FOLDER)
-    
+    app = Flask(
+        __name__,
+        static_folder=Config.STATIC_FOLDER,
+        template_folder=Config.TEMPLATE_FOLDER,
+    )
     app.config.from_object(Config)
-
     DatabaseConnection.set_config(app.config)
 
-    # Registrar las rutas de autenticación
-    app.register_blueprint(autenticacion_routes, url_prefix='/auth')
+    # Asignar la clave secreta directamente
+    app.config["SECRET_KEY"] = Config.SECRET_KEY
 
-    # Registrar las rutas de gestión de servidores
-    app.register_blueprint(servidores_routes, url_prefix='/servidores')
+    # Inicializar Flask-Login
+    login_manager = LoginManager(app)
 
-    # Registrar las rutas de gestión de servidores
-    app.register_blueprint(canales_routes, url_prefix='/canales')
+    # Configurar CORS con las opciones necesarias    
+    cors = CORS(app, supports_credentials=True, origins='*')   # Habilitar el uso de credenciales (cookies, autenticación)
 
-    # Registrar las rutas de gestión de mensajes
-    app.register_blueprint(mensajes_routes, url_prefix='/mensajes')
+    # Registrar el Blueprint de usuarios
+    app.register_blueprint(usuarios_bp)
 
-    # Registrar las rutas de gestión de usuarios, esto podriamos revisarlo si es posible
-    app.register_blueprint(usuarios_routes, url_prefix='/usuarios')
-    
+    # Registrar el Blueprint de servidores
+    app.register_blueprint(servidores_bp)
+
+    # Registrar el Blueprint de canales
+    app.register_blueprint(canales_bp)
+
+    # Registrar el Blueprint de canales
+    app.register_blueprint(mensajes_bp)
 
     return app
